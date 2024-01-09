@@ -1,9 +1,9 @@
 # Creates a dataset from HPI, HPAI, treasury rates, unemployment rates, wages, and supply. 
 # HPAI is calculated from HPI raw data. TVT split is 70-15-15. 
 # For the dataset generated from wages_monthly data (as opposed to wages_quarterly):
-#   train has 2248 examples, val has 482 examples, and test has 484 examples.
+#   train has 2247 examples, val has 481 examples, and test has 483 examples.
 # For the dataset generated from wages_quarterly data (as opposed to wages_monthly):
-#   dataset has yet to be generated. REMINDER: must divide values by 40 bc wages are weekly
+#   train has 4126 examples, val has 884 examples, and test has 885 examples.
 
 import numpy as np
 import pandas as pd
@@ -11,15 +11,16 @@ from datetime import datetime
 from pprint import pprint
 
 # filepaths for raw data
-hpi = "datasets/hpi.csv"
-ten_yrt = "datasets/10yr_treasury.csv" 
-unemployment = "datasets/unemployment.csv" 
-wages = "datasets/wages_monthly.csv" 
-# wages = "datasets/wages_quarterly.csv"
-supply = "datasets/supply.csv" 
+hpi = "raw_datasets/hpi.csv"
+ten_yrt = "raw_datasets/10yr_treasury.csv" 
+unemployment = "raw_datasets/unemployment.csv" 
+wages = "raw_datasets/wages_monthly.csv" 
+# wages = "raw_datasets/wages_quarterly.csv"
+wages_quarterly = "raw_datasets/wages_quarterly.csv"
+supply = "raw_datasets/supply.csv" 
 
 # save path toggle (based on which wage data being used) for final dataset split
-toggle = "_wm" if wages == "datasets/wages_monthly.csv" else "_wq"
+toggle = "_wm" if wages == "raw_datasets/wages_monthly.csv" else "_wq"
 
 def splitDataset(dataset, train=0.7, val=0.15, test=0.15):
     if (train + val + test != 1):
@@ -28,6 +29,7 @@ def splitDataset(dataset, train=0.7, val=0.15, test=0.15):
     # shuffle data points before splitting to guarantee randomness
     # DO NOT CHANGE RANDOM_STATE VALUE... ensures reproducibility (like a seed value)
     dataset = dataset.sample(frac=1, random_state=1)
+    # dataset.reset_index(drop=False, inplace=True) # uncomment to add dates back in to the final datasets
 
     total_rows = dataset.shape[0]
     train_end = int(total_rows * train)
@@ -42,8 +44,10 @@ def splitDataset(dataset, train=0.7, val=0.15, test=0.15):
     # print(val)
     # print("TEST")
 
-    print("Dataset successfully split into training, validation, and testing sets")
-    print(test)
+    print("2. Dataset successfully split into training, validation, and testing sets")
+    print("     Training size:  ", train.shape[0], "data points with", train.shape[1], "dimensions")
+    print("     Validation size:", val.shape[0], "data points with", val.shape[1], "dimensions")
+    print("     Testing size:   ", test.shape[0], "data points with", test.shape[1], "dimensions")
     
     return train, val, test
 
@@ -63,9 +67,9 @@ def constructDataset():
         "DATE": hpi_df["DATE"][1:],
         "HPAI": hpai_values[1:]
     })
-    hpai_df.to_csv("datasets/hpai.csv", index=False)
+    hpai_df.to_csv("raw_datasets/hpai.csv", index=False)
 
-    print("HPA Index data successfully extrapolated from HPI data")
+    print("1. HPA Index data successfully extrapolated from HPI data")
 
     # let the date be the index for all dataframes
     for df in [hpi_df, hpai_df, ten_yrt_df, unemployment_df, wages_df, supply_df]:
@@ -85,15 +89,21 @@ def constructDataset():
     combined_df = combined_df.apply(pd.to_numeric, errors='coerce')
     combined_df = combined_df.dropna()
 
-    # combined_df has shape: [3211 rows x 6 columns]
     # pprint(combined_df)
-    # pprint(combined_df.shape)
 
-    print("Dataset successfully constructed")
+    print("3. Dataset successfully constructed of size:", combined_df.shape[0], "data points with", combined_df.shape[1], "dimensions")
 
     return combined_df
 
+def cleanWagesQuarterly():
+    wages_df_quarterly = pd.read_csv(wages_quarterly, parse_dates=['DATE'])
+    wages_df_quarterly.iloc[:, 1] = wages_df_quarterly.iloc[:, 1] / 40
+    wages_df_quarterly.to_csv(wages_quarterly, index=False) # replace old wages_quarterly data
+
 def main():
+    # DO NOT UNCOMMENT, already cleaned (divided by 40 hours for hourly wage instead of weekly wage)
+    # cleanWagesQuarterly()
+
     dataset = constructDataset()
     train, val, test = splitDataset(dataset)
 
@@ -101,7 +111,7 @@ def main():
     val.to_csv("datasets/val" + toggle + ".csv", index=False)
     test.to_csv("datasets/test" + toggle + ".csv", index=False)
 
-    print("Dataset split successfully saved as csv")
+    print("4. Dataset split successfully saved as csv files")
 
 if __name__ == '__main__': 
     main()
