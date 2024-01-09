@@ -1,5 +1,5 @@
-# Creates a dataset from HPI, HPAI, treasury rates, unemployment rates, wages, and supply. 
-# HPAI is calculated from HPI raw data. TVT split is 70-15-15. 
+# Creates a dataset from HPI, HPA, treasury rates, unemployment rates, wages, and supply. 
+# HPA is calculated from HPI raw data. TVT split is 70-15-15. 
 # For the dataset generated from wages_monthly data (as opposed to wages_quarterly):
 #   train has 2247 examples, val has 481 examples, and test has 483 examples.
 # For the dataset generated from wages_quarterly data (as opposed to wages_monthly):
@@ -14,8 +14,8 @@ from pprint import pprint
 hpi = "raw_datasets/hpi.csv"
 ten_yrt = "raw_datasets/10yr_treasury.csv" 
 unemployment = "raw_datasets/unemployment.csv" 
-# wages = "raw_datasets/wages_monthly.csv" 
-wages = "raw_datasets/wages_quarterly.csv"
+wages = "raw_datasets/wages_monthly.csv" 
+# wages = "raw_datasets/wages_quarterly.csv"
 wages_quarterly = "raw_datasets/wages_quarterly.csv"
 supply = "raw_datasets/supply.csv" 
 
@@ -60,29 +60,29 @@ def constructDataset():
     wages_df = pd.read_csv(wages, parse_dates=['DATE'])
     supply_df = pd.read_csv(supply, parse_dates=['DATE'])
 
-    # create hpai (housing price appreciation index) data from hpi data
-    hpai_values = (hpi_df["VAL"].diff() / hpi_df["VAL"].shift(1)) * 100
-    hpai_df = pd.DataFrame({
+    # create hpa (housing price appreciation index) data from hpi data
+    hpa_values = (hpi_df["VAL"].diff() / hpi_df["VAL"].shift(12)) * 100 # 12 for months in a year, hpa is annual
+    hpa_df = pd.DataFrame({
         "DATE": hpi_df["DATE"][1:],
-        "HPAI": hpai_values[1:]
+        "HPA": hpa_values[1:]
     })
-    hpai_df.to_csv("raw_datasets/hpai.csv", index=False)
+    hpa_df.to_csv("raw_datasets/hpa.csv", index=False)
 
     print("1. HPA Index data successfully extrapolated from HPI data")
 
     # let the date be the index for all dataframes
-    for df in [hpi_df, hpai_df, ten_yrt_df, unemployment_df, wages_df, supply_df]:
+    for df in [hpi_df, hpa_df, ten_yrt_df, unemployment_df, wages_df, supply_df]:
         df.set_index('DATE', inplace=True)
     
     # find latest start year & earliest end year
-    latest_start = max([df.index.min() for df in [hpi_df, hpai_df, ten_yrt_df, unemployment_df, wages_df, supply_df]])
-    earliest_end = min([df.index.max() for df in [hpi_df, hpai_df, ten_yrt_df, unemployment_df, wages_df, supply_df]])
+    latest_start = max([df.index.min() for df in [hpi_df, hpa_df, ten_yrt_df, unemployment_df, wages_df, supply_df]])
+    earliest_end = min([df.index.max() for df in [hpi_df, hpa_df, ten_yrt_df, unemployment_df, wages_df, supply_df]])
 
     # merge into single dataframe
-    combined_df = pd.concat([hpi_df, hpai_df, ten_yrt_df, unemployment_df, wages_df, supply_df], axis=1)
+    combined_df = pd.concat([hpi_df, hpa_df, ten_yrt_df, unemployment_df, wages_df, supply_df], axis=1)
     combined_df.ffill(inplace=True)
     combined_df = combined_df[(combined_df.index >= latest_start) & (combined_df.index <= earliest_end)]
-    combined_df.columns = ['HPI', 'HPAI', 'TENYRT', 'UNEMPLOYMENT', 'WAGES', 'SUPPLY']
+    combined_df.columns = ['HPI', 'HPA', 'TENYRT', 'UNEMPLOYMENT', 'WAGES', 'SUPPLY']
 
     # parse out rows with invalid entries (some tenyrt values are just "." in the csv)
     combined_df = combined_df.apply(pd.to_numeric, errors='coerce')
