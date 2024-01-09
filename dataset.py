@@ -14,13 +14,13 @@ from pprint import pprint
 hpi = "raw_datasets/hpi.csv"
 ten_yrt = "raw_datasets/10yr_treasury.csv" 
 unemployment = "raw_datasets/unemployment.csv" 
-wages = "raw_datasets/wages_monthly.csv" 
-# wages = "raw_datasets/wages_quarterly.csv"
+# wages = "raw_datasets/wages_monthly.csv" 
+wages = "raw_datasets/wages_quarterly.csv"
 wages_quarterly = "raw_datasets/wages_quarterly.csv"
 supply = "raw_datasets/supply.csv" 
 
 # save path toggle (based on which wage data being used) for final dataset split
-toggle = "_wm" if wages == "raw_datasets/wages_monthly.csv" else "_wq"
+toggle = "wm_" if wages == "raw_datasets/wages_monthly.csv" else "wq_"
 
 def splitDataset(dataset, train=0.7, val=0.15, test=0.15):
     if (train + val + test != 1):
@@ -29,8 +29,7 @@ def splitDataset(dataset, train=0.7, val=0.15, test=0.15):
     # shuffle data points before splitting to guarantee randomness
     # DO NOT CHANGE RANDOM_STATE VALUE... ensures reproducibility (like a seed value)
     dataset = dataset.sample(frac=1, random_state=1)
-    # dataset.reset_index(drop=False, inplace=True) # uncomment to add dates back in to the final datasets
-
+    
     total_rows = dataset.shape[0]
     train_end = int(total_rows * train)
     val_end = train_end + int(total_rows * val)
@@ -89,6 +88,9 @@ def constructDataset():
     combined_df = combined_df.apply(pd.to_numeric, errors='coerce')
     combined_df = combined_df.dropna()
 
+    combined_df.reset_index(drop=False, inplace=True) # uncomment to add dates back in to the final datasets
+    combined_df.to_csv("datasets/" + toggle + "dataset.csv", index=False)
+
     # pprint(combined_df)
 
     print("3. Dataset successfully constructed of size:", combined_df.shape[0], "data points with", combined_df.shape[1], "dimensions")
@@ -107,9 +109,9 @@ def main():
     dataset = constructDataset()
     train, val, test = splitDataset(dataset)
 
-    train.to_csv("datasets/train" + toggle + ".csv", index=False)
-    val.to_csv("datasets/val" + toggle + ".csv", index=False)
-    test.to_csv("datasets/test" + toggle + ".csv", index=False)
+    train.to_csv("datasets/" + toggle + "train.csv", index=False)
+    val.to_csv("datasets/" + toggle + "val.csv", index=False)
+    test.to_csv("datasets/" + toggle + "test.csv", index=False)
 
     print("4. Dataset split successfully saved as csv files")
 
