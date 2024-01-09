@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 def wages_change():
     start_date = '2010-11-01' # earliest year is 2010
     end_date = '2023-12-01'
+    save_path = "visualizations/hpa_wages_change.png"
 
     # Load the datasets
     hpa_data = pd.read_csv('raw_datasets/hpa.csv', parse_dates=[0], index_col=0)
@@ -24,6 +25,7 @@ def wages_change():
     plt.xlabel('Wages (real avg earnings/hr)')
     plt.ylabel('HPA (MoM % Change)')
     plt.title(f'HPA vs Wages ({start_date} to {end_date})')
+    plt.savefig(save_path)
 
     # Display the plot
     plt.show()
@@ -31,6 +33,7 @@ def wages_change():
 def wages():
     start_date = '2010-01-01' # earliest year is 2010
     end_date = '2023-12-01'
+    save_path = "visualizations/hpa_wages.png"
 
     # Load the datasets
     hpa_data = pd.read_csv('raw_datasets/hpai.csv', parse_dates=[0], index_col=0)
@@ -51,6 +54,7 @@ def wages():
     plt.xlabel('Change in Wages (MoM % Change)')
     plt.ylabel('HPA (MoM % Change)')
     plt.title(f'HPA vs Change in Wages ({start_date} to {end_date})')
+    plt.savefig(save_path)
 
     # Display the plot
     plt.show()
