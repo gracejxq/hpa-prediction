@@ -67,11 +67,16 @@ def constructDataset():
     print(earliest_end)
 
     # filter each dataframe to start from  latest start year
-    hpi_df = hpi_df[hpi_df.index.year >= latest_start.year]
-    ten_yrt_df = ten_yrt_df[ten_yrt_df.index.year >= latest_start.year]
-    unemployment_df = unemployment_df[unemployment_df.index.year >= latest_start.year]
-    wages_df = wages_df[wages_df.index.year >= latest_start.year]
-    supply_df = supply_df[supply_df.index.year >= latest_start.year]
+    hpi_df = hpi_df[(hpi_df.index >= latest_start) & (hpi_df.index <= earliest_end)]
+    ten_yrt_df = ten_yrt_df[(ten_yrt_df.index >= latest_start) & (ten_yrt_df.index <= earliest_end)]
+    unemployment_df = unemployment_df[(unemployment_df.index >= latest_start) & (unemployment_df.index <= earliest_end)]
+    wages_df = wages_df[(wages_df.index >= latest_start) & (wages_df.index <= earliest_end)]
+    supply_df = supply_df[(supply_df.index >= latest_start) & (supply_df.index <= earliest_end)]
+    # hpi_df = hpi_df[hpi_df.index.year >= latest_start.year]
+    # ten_yrt_df = ten_yrt_df[ten_yrt_df.index.year >= latest_start.year]
+    # unemployment_df = unemployment_df[unemployment_df.index.year >= latest_start.year]
+    # wages_df = wages_df[wages_df.index.year >= latest_start.year]
+    # supply_df = supply_df[supply_df.index.year >= latest_start.year]
 
     combined_df = pd.concat([hpi_df, ten_yrt_df, unemployment_df, wages_df, supply_df], axis=1)
     combined_df.fillna(method='ffill', inplace=True)
