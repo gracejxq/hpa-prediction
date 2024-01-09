@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 
 start_date = '2010-11-01'
 end_date = '2023-07-01'
+save_path = "visualizations/hpa_10yrt.png"
 
 # Load the datasets
 hpa_data = pd.read_csv('raw_datasets/hpa.csv', parse_dates=[0], index_col=0)
@@ -26,6 +27,7 @@ plt.xlabel('10yr Treasury Yield (%)')
 plt.xticks([0, 1, 2, 3, 4, 5])
 plt.ylabel('HPA (MoM % Change)')
 plt.title(f'HPA vs 10yr Treasury Yield ({start_date} to {end_date})')
+plt.savefig(save_path)
 
 # Display the plot
 plt.show()

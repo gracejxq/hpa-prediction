@@ -18,7 +18,7 @@ ten_yrt = "raw_datasets/ten_yrt.csv"
 mortgage = "raw_datasets/mortgage.csv"
 unemployment = "raw_datasets/unemployment.csv" 
 wages = "raw_datasets/wages_monthly.csv" 
-# wages = "raw_datasets/wages_quarterly.csv"
+# wages = "raw_datasets/wages_quarterly.csv" # no need to toggle anymore, only use monthly wages
 wages_quarterly = "raw_datasets/wages_quarterly.csv"
 supply = "raw_datasets/supply.csv" 
 
