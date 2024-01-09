@@ -19,7 +19,7 @@ wages = "datasets/wages_monthly.csv"
 supply = "datasets/supply.csv" 
 
 # save path toggle (based on which wage data being used) for final dataset split
-toggle = "_wm.csv" if wages == "datasets/wages_monthly.csv" else "_wq.csv"
+toggle = "_wm" if wages == "datasets/wages_monthly.csv" else "_wq"
 
 def splitDataset(dataset, train=0.7, val=0.15, test=0.15):
     if (train + val + test != 1):
