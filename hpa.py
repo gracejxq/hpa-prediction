@@ -6,7 +6,7 @@ end_date = '2023-12-01'
 
 # Load the datasets
 hpa_data = pd.read_csv('raw_datasets/hpa.csv', parse_dates=[0], index_col=0)
-unemployment_data = pd.read_csv('raw_datasets/unemployment.csv', parse_dates=[0], index_col=0)
+date_data = pd.read_csv('raw_datasets/unemployment.csv', parse_dates=[0], index_col=0)
 
 # Filter the datasets for the date range
 hpa_data = hpa_data[(hpa_data.index >= start_date) & (hpa_data.index <= end_date)]
