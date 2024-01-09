@@ -1,4 +1,4 @@
-# Creates a dataset from HPI, HPA, treasury rates, unemployment rates, wages, and supply. 
+# Creates a dataset from HPI, HPA, treasury rates, mortgage rates, unemployment rates, wages, and supply. 
 # HPA is calculated from HPI raw data. TVT split is 70-15-15. 
 # For the dataset generated from wages_monthly data (as opposed to wages_quarterly):
 #   train has 2247 examples, val has 481 examples, and test has 483 examples.
@@ -7,12 +7,15 @@
 
 import numpy as np
 import pandas as pd
+from varname import nameof
+import numbers
 from datetime import datetime
 from pprint import pprint
 
 # filepaths for raw data
 hpi = "raw_datasets/hpi.csv"
-ten_yrt = "raw_datasets/10yr_treasury.csv" 
+ten_yrt = "raw_datasets/ten_yrt.csv" 
+mortgage = "raw_datasets/mortgage.csv"
 unemployment = "raw_datasets/unemployment.csv" 
 wages = "raw_datasets/wages_monthly.csv" 
 # wages = "raw_datasets/wages_quarterly.csv"
@@ -50,45 +53,95 @@ def splitDataset(dataset, train=0.7, val=0.15, test=0.15):
     
     return train, val, test
 
-# Function to construct a dataset with inputs from 10 year treasury rates, unemployment rates,
-# wages, and housing supply & outputs the HPA index; daily increments
+def replace_invalid_with_nan(val):
+    if val == "None":
+        return np.nan
+    return val
+
+def calculateChangeDFs(raw_df, raw_df_name):
+    new_df = raw_df.copy()
+    if raw_df_name == "hpi":
+        modified_df_name = "hpa.csv"
+    else:
+        modified_df_name = raw_df_name + "_apc.csv"
+    
+    # determine the shift size based on the frequency of measurements
+    if raw_df_name in {"ten_yrt"}: # daily
+        shift_size = 249
+    elif raw_df_name in {"mortgage"}: # weekly
+        shift_size = 52
+    elif raw_df_name in {"hpi", "unemployment", "wages"}: # monthly
+        shift_size = 12
+    else: # quarterly
+        shift_size = 4
+    
+    # shift and calculate annual percentage change
+    new_df['VAL_PREV_YEAR'] = new_df['VAL'].shift(shift_size)
+    new_df['VAL_PREV_YEAR'] = new_df['VAL_PREV_YEAR'].apply(replace_invalid_with_nan)
+    new_df['PC'] = (new_df['VAL'] - new_df['VAL_PREV_YEAR']) / new_df['VAL_PREV_YEAR'] * 100
+
+    # drop middle 2 columns (intermediaries) & cut first year (no previous years for calculation)
+    new_df = new_df.drop(['VAL', 'VAL_PREV_YEAR'], axis=1)
+    new_df = new_df[new_df['PC'].notna()]
+
+    new_df.to_csv("raw_datasets/" + modified_df_name)
+
+    return new_df
+
+# Function to construct a dataset with inputs from 10 year treasury rates, mortgage rates, 
+# unemployment rates, wages, and housing supply & outputs the HPA index; daily increments
 def constructDataset():
     # convert all csv files to dataframes & parse dates
     hpi_df = pd.read_csv(hpi, parse_dates=['DATE'])
     ten_yrt_df = pd.read_csv(ten_yrt, parse_dates=['DATE'])
+    mortgage_df = pd.read_csv(mortgage, parse_dates=['DATE'])
     unemployment_df = pd.read_csv(unemployment, parse_dates=['DATE'])
     wages_df = pd.read_csv(wages, parse_dates=['DATE'])
     supply_df = pd.read_csv(supply, parse_dates=['DATE'])
 
-    # create hpa (housing price appreciation index) data from hpi data
-    hpa_values = (hpi_df["VAL"].diff() / hpi_df["VAL"].shift(12)) * 100 # 12 for months in a year, hpa is annual
-    hpa_df = pd.DataFrame({
-        "DATE": hpi_df["DATE"][1:],
-        "HPA": hpa_values[1:]
-    })
-    hpa_df.to_csv("raw_datasets/hpa.csv", index=False)
-
-    print("1. HPA Index data successfully extrapolated from HPI data")
-
     # let the date be the index for all dataframes
-    for df in [hpi_df, hpa_df, ten_yrt_df, unemployment_df, wages_df, supply_df]:
+    for df in [hpi_df, ten_yrt_df, mortgage_df, unemployment_df, wages_df, supply_df]:
         df.set_index('DATE', inplace=True)
-    
+
+    # parse out rows with invalid entries (some tenyrt values are just "." in the csv)
+    ten_yrt_df = ten_yrt_df.apply(pd.to_numeric, errors='coerce')
+    ten_yrt_df = ten_yrt_df.dropna()
+
+    all_raw_datasets = [hpi_df]
+    # second param splices out "_df" for naming purposes (same for all calls to calculateChangeDFs)
+    all_raw_datasets.append(calculateChangeDFs(hpi_df, nameof(hpi_df)[:-3]))
+    all_raw_datasets.append(ten_yrt_df)
+    all_raw_datasets.append(calculateChangeDFs(ten_yrt_df, nameof(ten_yrt_df)[:-3]))
+    all_raw_datasets.append(mortgage_df)
+    all_raw_datasets.append(calculateChangeDFs(mortgage_df, nameof(mortgage_df)[:-3]))
+    all_raw_datasets.append(unemployment_df)
+    all_raw_datasets.append(calculateChangeDFs(unemployment_df, nameof(unemployment_df)[:-3]))
+    all_raw_datasets.append(wages_df)
+    all_raw_datasets.append(calculateChangeDFs(wages_df, nameof(wages_df)[:-3]))
+    all_raw_datasets.append(supply_df)
+    all_raw_datasets.append(calculateChangeDFs(supply_df, nameof(supply_df)[:-3]))
+
+    print("1. Annual percentage change data successfully extrapolated from HPI data & prelim dataset constructed")
+
     # find latest start year & earliest end year
-    latest_start = max([df.index.min() for df in [hpi_df, hpa_df, ten_yrt_df, unemployment_df, wages_df, supply_df]])
-    earliest_end = min([df.index.max() for df in [hpi_df, hpa_df, ten_yrt_df, unemployment_df, wages_df, supply_df]])
+    latest_start = max([df.index.min() for df in all_raw_datasets])
+    earliest_end = min([df.index.max() for df in all_raw_datasets])
 
     # merge into single dataframe
-    combined_df = pd.concat([hpi_df, hpa_df, ten_yrt_df, unemployment_df, wages_df, supply_df], axis=1)
+    combined_df = pd.concat(all_raw_datasets, axis=1)
     combined_df.ffill(inplace=True)
     combined_df = combined_df[(combined_df.index >= latest_start) & (combined_df.index <= earliest_end)]
-    combined_df.columns = ['HPI', 'HPA', 'TENYRT', 'UNEMPLOYMENT', 'WAGES', 'SUPPLY']
+
+    # pprint(combined_df)
+
+    combined_df.columns = ['HPI', 'HPA_PC', 'TENYRT', 'TENYRT_PC', 'MORTGAGE', 'MORTGAGE_PC', 'UNEMPLOYMENT', 'UNEMPLOYMENT_PC', 'WAGES', 'WAGES_PC', 'SUPPLY', 'SUPPLY_PC']
 
     # parse out rows with invalid entries (some tenyrt values are just "." in the csv)
     combined_df = combined_df.apply(pd.to_numeric, errors='coerce')
     combined_df = combined_df.dropna()
 
-    combined_df.reset_index(drop=False, inplace=True) # uncomment to add dates back in to the final datasets
+    # add dates back in to the final datasets (instead of being the index)
+    combined_df.reset_index(drop=False, inplace=True) 
     combined_df.to_csv("datasets/" + toggle + "dataset.csv", index=False)
 
     # pprint(combined_df)
