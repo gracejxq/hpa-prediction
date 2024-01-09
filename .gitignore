@@ -1,2 +1,3 @@
 /datasets/*.csv
 /raw_datasets/*.csv
+venv/*

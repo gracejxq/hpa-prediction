@@ -5,11 +5,11 @@ start_date = '2000-01-01' # earliest year is 2000
 end_date = '2023-12-01'
 
 # Load the datasets
-hpa_data = pd.read_csv('raw_datasets/hpai.csv', parse_dates=[0], index_col=0)
+hpa_data = pd.read_csv('raw_datasets/hpa.csv', parse_dates=[0], index_col=0)
 supply_data = pd.read_csv('raw_datasets/supply.csv', parse_dates=[0], index_col=0)
 
 # Filter the datasets for the date range
-hpa_data = hpa_data[(hpa_data.index >= start_date) & (hpa_data.index <= end_date)] * 100
+hpa_data = hpa_data[(hpa_data.index >= start_date) & (hpa_data.index <= end_date)]
 supply_data = supply_data[(supply_data.index >= start_date) & (supply_data.index <= end_date)]
 
 # Merge the datasets on the date column
