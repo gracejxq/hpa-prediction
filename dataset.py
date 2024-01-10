@@ -31,7 +31,7 @@ def splitDataset(dataset, train=0.7, val=0.15, test=0.15):
     
     # shuffle data points before splitting to guarantee randomness
     # DO NOT CHANGE RANDOM_STATE VALUE... ensures reproducibility (like a seed value)
-    dataset = dataset.sample(frac=1, random_state=1)
+    # dataset = dataset.sample(frac=1, random_state=1)
     
     total_rows = dataset.shape[0]
     train_end = int(total_rows * train)
@@ -175,6 +175,7 @@ def main():
 
     # condenses dataset to only include one entry from each month
     condensed_dataset = condenseDataset(complete_dataset)
+    condensed_dataset = condensed_dataset.drop(['YEAR_MONTH'], axis=1)
     condensed_dataset.to_csv("datasets/new_" + toggle + "dataset.csv", index=False)
     train_new, val_new, test_new = splitDataset(condensed_dataset)
 
