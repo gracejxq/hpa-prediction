@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 
 start_date = '2000-01-01' # earliest year is 2000
 end_date = '2023-12-01'
+save_path = "visualizations/hpa_supply.png"
 
 # Load the datasets
 hpa_data = pd.read_csv('raw_datasets/hpa.csv', parse_dates=[0], index_col=0)
@@ -23,6 +24,7 @@ plt.scatter(merged_data.iloc[:, 1], merged_data.iloc[:, 0])
 plt.xlabel('Supply (total # of housing units)')
 plt.ylabel('HPA (MoM % Change)')
 plt.title(f'HPA vs Supply ({start_date} to {end_date})')
+plt.savefig(save_path)
 
 # Display the plot
 plt.show()
