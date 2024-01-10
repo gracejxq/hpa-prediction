@@ -142,7 +142,6 @@ def constructDataset():
 
     # add dates back in to the final datasets (instead of being the index)
     combined_df.reset_index(drop=False, inplace=True) 
-    combined_df.to_csv("datasets/" + toggle + "dataset.csv", index=False)
 
     # pprint(combined_df)
 
@@ -155,16 +154,33 @@ def cleanWagesQuarterly():
     wages_df_quarterly.iloc[:, 1] = wages_df_quarterly.iloc[:, 1] / 40
     wages_df_quarterly.to_csv(wages_quarterly, index=False) # replace old wages_quarterly data
 
+def condenseDataset(original):
+    condensed_df = original.copy()
+    condensed_df = condensed_df.sort_values(by='DATE')
+    condensed_df['YEAR_MONTH'] = condensed_df['DATE'].dt.to_period('M')
+    condensed_df = condensed_df.drop_duplicates(subset='YEAR_MONTH')
+    return condensed_df
+
 def main():
     # DO NOT UNCOMMENT, already cleaned (divided by 40 hours for hourly wage instead of weekly wage)
     # cleanWagesQuarterly()
 
-    dataset = constructDataset()
-    train, val, test = splitDataset(dataset)
+    complete_dataset = constructDataset() # uses extrapolation
+    complete_dataset.to_csv("datasets/" + toggle + "dataset.csv", index=False)
+    train, val, test = splitDataset(complete_dataset)
 
     train.to_csv("datasets/" + toggle + "train.csv", index=False)
     val.to_csv("datasets/" + toggle + "val.csv", index=False)
     test.to_csv("datasets/" + toggle + "test.csv", index=False)
+
+    # condenses dataset to only include one entry from each month
+    condensed_dataset = condenseDataset(complete_dataset)
+    condensed_dataset.to_csv("datasets/new_" + toggle + "dataset.csv", index=False)
+    train_new, val_new, test_new = splitDataset(condensed_dataset)
+
+    train_new.to_csv("datasets/new_" + toggle + "train.csv", index=False)
+    val_new.to_csv("datasets/new_" + toggle + "val.csv", index=False)
+    test_new.to_csv("datasets/new_" + toggle + "test.csv", index=False)
 
     print("4. Dataset split successfully saved as csv files")
 

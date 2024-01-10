@@ -36,7 +36,7 @@ def wages():
     save_path = "visualizations/hpa_wages.png"
 
     # Load the datasets
-    hpa_data = pd.read_csv('raw_datasets/hpai.csv', parse_dates=[0], index_col=0)
+    hpa_data = pd.read_csv('raw_datasets/hpa.csv', parse_dates=[0], index_col=0)
     wage_data = pd.read_csv('raw_datasets/wages_monthly.csv', parse_dates=[0], index_col=0)
 
     # Filter the datasets for the date range
