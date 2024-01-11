@@ -1,17 +1,19 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-start_date = '1987-01-01' # earliest year is 1987
-end_date = '2023-12-01'
+start_date = '2011-11-01' # earliest year is 2011
+end_date = '2023-07-01'
 save_path = "visualizations/hpa_unemployment.png"
 
 # Load the datasets
-hpa_data = pd.read_csv('raw_datasets/hpa.csv', parse_dates=[0], index_col=0)
-unemployment_data = pd.read_csv('raw_datasets/unemployment.csv', parse_dates=[0], index_col=0)
+hpa_data = pd.read_csv('datasets/new_wm_dataset.csv', parse_dates=[0], index_col=0)
+unemployment_data = pd.read_csv('datasets/new_wm_dataset.csv', parse_dates=[0], index_col=0)
 
 # Filter the datasets for the date range
 hpa_data = hpa_data[(hpa_data.index >= start_date) & (hpa_data.index <= end_date)]
+hpa_data = hpa_data['HPA_PC']
 unemployment_data = unemployment_data[(unemployment_data.index >= start_date) & (unemployment_data.index <= end_date)]
+unemployment_data = unemployment_data['UNEMPLOYMENT']
 
 # Merge the datasets on the date column
 merged_data = pd.merge(hpa_data, unemployment_data, left_index=True, right_index=True)
