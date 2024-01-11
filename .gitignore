@@ -1,4 +1,3 @@
 /datasets/*.csv
 /raw_datasets/*.csv
-/visualizations/*.png
 venv/*

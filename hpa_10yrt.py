@@ -17,17 +17,24 @@ treasury_data = treasury_data['TENYRT']
 
 # Merge the datasets on the date column
 merged_data = pd.merge(hpa_data, treasury_data, left_index=True, right_index=True)
-sorted_merged_data = merged_data.sort_values(by='TENYRT', ascending=True)
+merged_data = merged_data.sort_values(by='TENYRT', ascending=True)
+merged_data['Year'] = merged_data.index.year
 
 # Create a scatter plot
 plt.figure(figsize=(10, 6))
-plt.scatter(sorted_merged_data.iloc[:, 1], sorted_merged_data.iloc[:, 0])
+# plt.scatter(merged_data.iloc[:, 1], merged_data.iloc[:, 0])
+cmap = plt.get_cmap('viridis')
+unique_years = sorted(merged_data['Year'].unique())
+color_dict = {year: cmap(i / len(unique_years)) for i, year in enumerate(unique_years)}
+for year in unique_years:
+    subset = merged_data[merged_data['Year'] == year]
+    plt.scatter(subset.iloc[:, 1], subset.iloc[:, 0], color=color_dict[year], label=year)
 
 # Adding labels and title
 plt.xlabel('10yr Treasury Yield (%)')
-plt.xticks([0, 1, 2, 3, 4, 5])
 plt.ylabel('HPA (MoM % Change)')
 plt.title(f'HPA vs 10yr Treasury Yield ({start_date} to {end_date})')
+plt.legend(title='Year', loc='upper right', bbox_to_anchor=(1.1, 1))
 plt.savefig(save_path)
 
 # Display the plot

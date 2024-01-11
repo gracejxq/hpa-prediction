@@ -18,15 +18,23 @@ def wages_change():
 
     # Merge the datasets on the date column
     merged_data = pd.merge(hpa_data, wage_data, left_index=True, right_index=True)
+    merged_data['Year'] = merged_data.index.year
 
     # Create a scatter plot
     plt.figure(figsize=(10, 6))
-    plt.scatter(merged_data.iloc[:, 1], merged_data.iloc[:, 0])
+    # plt.scatter(merged_data.iloc[:, 1], merged_data.iloc[:, 0])
+    cmap = plt.get_cmap('viridis')
+    unique_years = sorted(merged_data['Year'].unique())
+    color_dict = {year: cmap(i / len(unique_years)) for i, year in enumerate(unique_years)}
+    for year in unique_years:
+        subset = merged_data[merged_data['Year'] == year]
+        plt.scatter(subset.iloc[:, 1], subset.iloc[:, 0], color=color_dict[year], label=year)
 
     # Adding labels and title
     plt.xlabel('Change in Wages (MoM % Change)')
     plt.ylabel('HPA (MoM % Change)')
     plt.title(f'HPA vs Wage Growth ({start_date} to {end_date})')
+    plt.legend(title='Year', loc='upper right', bbox_to_anchor=(1.1, 1))
     plt.savefig(save_path)
 
     # Display the plot
@@ -49,20 +57,28 @@ def wages():
 
     # Merge the datasets on the date column
     merged_data = pd.merge(hpa_data, wage_data, left_index=True, right_index=True)
+    merged_data['Year'] = merged_data.index.year
 
     # Create a scatter plot
     plt.figure(figsize=(10, 6))
-    plt.scatter(merged_data.iloc[:, 1], merged_data.iloc[:, 0])
+    # plt.scatter(merged_data.iloc[:, 1], merged_data.iloc[:, 0])
+    cmap = plt.get_cmap('viridis')
+    unique_years = sorted(merged_data['Year'].unique())
+    color_dict = {year: cmap(i / len(unique_years)) for i, year in enumerate(unique_years)}
+    for year in unique_years:
+        subset = merged_data[merged_data['Year'] == year]
+        plt.scatter(subset.iloc[:, 1], subset.iloc[:, 0], color=color_dict[year], label=year)
 
     # Adding labels and title
     plt.xlabel('Wages ($ real avg earnings/hr)')
     plt.ylabel('HPI')
     plt.title(f'HPI vs Wages ({start_date} to {end_date})')
+    plt.legend(title='Year', loc='upper right', bbox_to_anchor=(1.1, 1))
     plt.savefig(save_path)
 
     # Display the plot
     plt.show()
 
 # Toggle between graphing 0th order or 1st order changes
-wages()
-# wages_change()
+# wages()
+wages_change()
