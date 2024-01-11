@@ -161,6 +161,19 @@ def condenseDataset(original):
     condensed_df = condensed_df.drop_duplicates(subset='YEAR_MONTH')
     return condensed_df
 
+def splitByEra(dataset):
+    dataset['DATE'] = pd.to_datetime(dataset['DATE'])
+    dataset['YEAR'] = dataset['DATE'].dt.year
+    dataset_years = {
+        '2010-2020': dataset[dataset['YEAR'].between(2010, 2020)],
+        '2021': dataset[dataset['YEAR'] == 2021],
+        '2022': dataset[dataset['YEAR'] == 2022],
+        '2023': dataset[dataset['YEAR'] == 2023],
+    }
+    return dataset_years
+    # new_datasets = {year: group for year, group in dataset.groupby('YEAR')}
+
+
 def main():
     # DO NOT UNCOMMENT, already cleaned (divided by 40 hours for hourly wage instead of weekly wage)
     # cleanWagesQuarterly()
@@ -184,6 +197,10 @@ def main():
     test_new.to_csv("datasets/new_" + toggle + "test.csv", index=False)
 
     print("4. Dataset split successfully saved as csv files")
+
+    splitByEra(condensed_dataset)
+
+    print("5. Dataset split successfully by era and saved as csv files")
 
 if __name__ == '__main__': 
     main()
