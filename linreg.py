@@ -20,7 +20,7 @@ def linreg(x, y):
     return mse, model.coef_, model.intercept_
 
 def visualize_all(x, y, coeff, intercept, var, prefix):
-    plt.scatter(x, y, color='blue', label='Validation Data')
+    plt.scatter(x, y, color='black', label='Data 2011-2023')
     plt.plot(x, coeff[0] * x + intercept, color='red', label='Regression Line')
     plt.title('Linear Regression: HPA vs. ' + var)
     plt.xlabel(var)
@@ -30,27 +30,28 @@ def visualize_all(x, y, coeff, intercept, var, prefix):
     plt.clf()
 
 def visualize_eras(x, y, dataset_years_df, var, prefix):
-    eras = [[dataset_years_df['2010-2020'][var], dataset_years_df['2010-2020']["HPA_PC"]],
-            [dataset_years_df['2021'][var], dataset_years_df['2021']["HPA_PC"]],
-            [dataset_years_df['2022'][var], dataset_years_df['2022']["HPA_PC"]],
-            [dataset_years_df['2023'][var], dataset_years_df['2023']["HPA_PC"]]]
+    eras = [[dataset_years_df['Era 1'][var], dataset_years_df['Era 1']["HPA_PC"]],
+            [dataset_years_df['Era 2'][var], dataset_years_df['Era 2']["HPA_PC"]],
+            [dataset_years_df['Era 3'][var], dataset_years_df['Era 3']["HPA_PC"]],
+            [dataset_years_df['Era 4'][var], dataset_years_df['Era 4']["HPA_PC"]],
+            [dataset_years_df['Era 5'][var], dataset_years_df['Era 5']["HPA_PC"]]]
     
-    plt.scatter(eras[0][0], eras[0][1], color='gold', label='2011-2020')
-    print(eras[1][0])
-    print(eras[1][1])
-    plt.scatter(eras[1][0], eras[1][1], color='green', label='2021')
-    plt.scatter(eras[2][0], eras[2][1], color='blue', label='2022')
-    plt.scatter(eras[3][0], eras[3][1], color='purple', label='2023')
+    plt.scatter(eras[0][0], eras[0][1], color='gold', label='01/2011 - 12/2013')
+    plt.scatter(eras[1][0], eras[1][1], color='yellowgreen', label='01/2014 - 03/2020')
+    plt.scatter(eras[2][0], eras[2][1], color='green', label='04/2020 - 06/2021')
+    plt.scatter(eras[3][0], eras[3][1], color='blue', label='07/2021 - 06/2022')
+    plt.scatter(eras[4][0], eras[4][1], color='purple', label='07/2022 - 06/2023')
 
-    colors = ['gold', 'green', 'blue', 'purple']
-    years = ['\'10-\'20','\'21','\'22','\'23']
-    for i in range(0, 4):
+    colors = ['gold', 'yellowgreen', 'green', 'blue', 'purple']
+    years = ['01/2011 - 12/2013', '01/2014 - 03/2020', '04/2020 - 06/2021', '07/2021 - 06/2022', '07/2022 - 06/2023']
+    for i in range(0, 5):
         _, coeff, intercept = linreg(eras[i][0], eras[i][1])
-        plt.plot(x, coeff[0] * x + intercept, color=colors[i], label=years[i] + ' Regression Line')
+        plt.plot(x, coeff[0] * x + intercept, color=colors[i], label=years[i] + ' RL')
     
     plt.title('Linear Regression: HPA vs. ' + var)
     plt.xlabel(var)
     plt.ylabel("HPA")
+    plt.ylim(-5, 22)
     plt.legend()
     plt.savefig(prefix + var)
     plt.clf()

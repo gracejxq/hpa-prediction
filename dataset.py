@@ -163,15 +163,14 @@ def condenseDataset(original):
 
 def splitByEra(dataset):
     dataset['DATE'] = pd.to_datetime(dataset['DATE'])
-    dataset['YEAR'] = dataset['DATE'].dt.year
-    dataset_years = {
-        '2010-2020': dataset[dataset['YEAR'].between(2010, 2020)],
-        '2021': dataset[dataset['YEAR'] == 2021],
-        '2022': dataset[dataset['YEAR'] == 2022],
-        '2023': dataset[dataset['YEAR'] == 2023],
-    }
-    return dataset_years
-    # new_datasets = {year: group for year, group in dataset.groupby('YEAR')}
+
+    dataset_dates = {
+        'Era 1': dataset[(dataset['DATE'] >= '2011-01-01') & (dataset['DATE'] <= '2013-12-31')],
+        'Era 2': dataset[(dataset['DATE'] >= '2014-01-01') & (dataset['DATE'] <= '2020-03-31')],
+        'Era 3': dataset[(dataset['DATE'] >= '2020-04-01') & (dataset['DATE'] <= '2021-06-30')],
+        'Era 4': dataset[(dataset['DATE'] >= '2021-07-01') & (dataset['DATE'] <= '2022-06-30')],
+        'Era 5': dataset[(dataset['DATE'] >= '2022-07-01') & (dataset['DATE'] <= '2023-06-30')]}
+    return dataset_dates
 
 
 def main():
