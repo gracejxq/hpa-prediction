@@ -66,7 +66,7 @@ def main():
     variables = ["TENYRT", "TENYRT_PC","MORTGAGE","MORTGAGE_PC","UNEMPLOYMENT","UNEMPLOYMENT_PC","WAGES","WAGES_PC","SUPPLY","SUPPLY_PC"]
     
     path_prefix_all = "linreg_vis_all/"
-    path_prefix_eras = "linreg_vis_split/"
+    path_prefix_eras = "linreg_vis_era/"
 
     # predict hpa vs. single variables (no percent changes)
     print()
