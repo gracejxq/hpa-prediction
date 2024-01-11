@@ -1,16 +1,17 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-start_date = '2010-11-01'
+start_date = '2011-11-01' # earliest year is 2011
 end_date = '2023-07-01'
 save_path = "visualizations/hpa_10yrt.png"
 
 # Load the datasets
-hpa_data = pd.read_csv('raw_datasets/hpa.csv', parse_dates=[0], index_col=0)
-treasury_data = pd.read_csv('datasets/wm_dataset.csv', parse_dates=[0], index_col=0)
+hpa_data = pd.read_csv('datasets/new_wm_dataset.csv', parse_dates=[0], index_col=0)
+treasury_data = pd.read_csv('datasets/new_wm_dataset.csv', parse_dates=[0], index_col=0)
 
 # Filter the datasets for the date range
 hpa_data = hpa_data[(hpa_data.index >= start_date) & (hpa_data.index <= end_date)]
+hpa_data = hpa_data['HPA_PC']
 treasury_data = treasury_data[(treasury_data.index >= start_date) & (treasury_data.index <= end_date)]
 treasury_data = treasury_data['TENYRT']
 
