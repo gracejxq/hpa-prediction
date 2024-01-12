@@ -20,11 +20,23 @@ def linreg(x, y):
     return mse, model.coef_, model.intercept_
 
 def visualize_all(x, y, coeff, intercept, var, prefix):
-    plt.scatter(x, y, color='black', label='Data 2011-2023')
+    var_to_xlabel = {'MORTGAGE': "Mortgage Rates",
+                     'MORTGAGE_PC': "Annual Percent Change of Mortgage Rates",
+                     'SUPPLY': "Housing Supply",
+                     'SUPPLY_PC': "Annual Percent Change of Housing Supply",
+                     'TENYRT': "10-Year Treasury Rates",
+                     'TENYRT_PC': "Annual Percent Change of 10-Year Treasury Rates",
+                     'UNEMPLOYMENT': "Unemployment",
+                     'UNEMPLOYMENT_PC': "Annual Percent Change of Unemployment",
+                     'WAGES': "Wages",
+                     'WAGES_PC': "Annual Percent Change of Wages"}
+    label = var_to_xlabel[var]
+
+    plt.scatter(x, y, color='black', label='2011-2023 Data')
     plt.plot(x, coeff[0] * x + intercept, color='red', label='Regression Line')
-    plt.title('Linear Regression: HPA vs. ' + var)
-    plt.xlabel(var)
-    plt.ylabel("HPA")
+    plt.title('HPA vs. ' + label)
+    plt.xlabel(label)
+    plt.ylabel("HPA (%)")
     plt.legend()
     plt.savefig(prefix + var)
     plt.clf()
@@ -48,20 +60,31 @@ def visualize_eras(x, y, dataset_years_df, var, prefix):
         _, coeff, intercept = linreg(eras[i][0], eras[i][1])
         plt.plot(x, coeff[0] * x + intercept, color=colors[i], label=years[i] + ' RL')
     
-    plt.title('Linear Regression: HPA vs. ' + var)
-    plt.xlabel(var)
-    plt.ylabel("HPA")
+
+    var_to_xlabel = {'MORTGAGE': "Mortgage Rates",
+                     'MORTGAGE_PC': "Annual Percent Change of Mortgage Rates",
+                     'SUPPLY': "Housing Supply",
+                     'SUPPLY_PC': "Annual Percent Change of Housing Supply",
+                     'TENYRT': "10-Year Treasury Rates",
+                     'TENYRT_PC': "Annual Percent Change of 10-Year Treasury Rates",
+                     'UNEMPLOYMENT': "Unemployment",
+                     'UNEMPLOYMENT_PC': "Annual Percent Change of Unemployment",
+                     'WAGES': "Wages",
+                     'WAGES_PC': "Annual Percent Change of Wages"}
+    label = var_to_xlabel[var]
+
+    plt.title('HPA vs. ' + label)
+    plt.xlabel(label)
+    plt.ylabel("HPA (%)")
     plt.ylim(-5, 22)
-    plt.legend()
+    plt.legend(loc='upper right')
     plt.savefig(prefix + var)
     plt.clf()
-
 
 def main():
     dataset_df = pd.read_csv("datasets/new_wm_dataset.csv", parse_dates=['DATE'])
     dataset_years_df = splitByEra(dataset_df)
 
-    predict_hpi = 'HPI'
     predict_hpa = 'HPA_PC'
     variables = ["TENYRT", "TENYRT_PC","MORTGAGE","MORTGAGE_PC","UNEMPLOYMENT","UNEMPLOYMENT_PC","WAGES","WAGES_PC","SUPPLY","SUPPLY_PC"]
     
