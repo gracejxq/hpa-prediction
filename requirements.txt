@@ -1,5 +1,0 @@
-numpy
-pandas
-pprint
-sklearn
-torch
