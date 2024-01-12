@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
+from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt
 from dataset import splitByEra
@@ -15,9 +16,10 @@ def linreg(x, y):
     model = LinearRegression()
     model.fit(x_reshaped, y)
     predictions = model.predict(x_reshaped)
+    r2 = r2_score(y, predictions)
     mse = mean_squared_error(y, predictions)
 
-    return mse, model.coef_, model.intercept_
+    return r2, mse, model.coef_, model.intercept_
 
 def visualize_all(x, y, coeff, intercept, var, prefix):
     var_to_xlabel = {'MORTGAGE': "Mortgage Rates",
@@ -57,7 +59,7 @@ def visualize_eras(x, y, dataset_years_df, var, prefix):
     colors = ['gold', 'yellowgreen', 'green', 'blue', 'purple']
     years = ['01/2011 - 12/2013', '01/2014 - 03/2020', '04/2020 - 06/2021', '07/2021 - 06/2022', '07/2022 - 06/2023']
     for i in range(0, 5):
-        _, coeff, intercept = linreg(eras[i][0], eras[i][1])
+        _, _, coeff, intercept = linreg(eras[i][0], eras[i][1])
         plt.plot(x, coeff[0] * x + intercept, color=colors[i], label=years[i] + ' RL')
     
 
@@ -95,9 +97,10 @@ def main():
     print()
     print("1. HPA VS. SINGLE VARIABLES")
     for i in range(0, len(variables), 2):
-        mse, coeff, intercept = linreg(dataset_df[variables[i]], dataset_df[predict_hpa])
+        r2, mse, coeff, intercept = linreg(dataset_df[variables[i]], dataset_df[predict_hpa])
         print("HPA vs.", variables[i], ": coeff =", coeff[0], "& intercept =", intercept)
         print("        MSE:", mse)
+        print("         R2:", r2)
 
         visualize_all(dataset_df[variables[i]], dataset_df[predict_hpa], coeff, intercept, variables[i], path_prefix_all)
         visualize_eras(dataset_df[variables[i]], dataset_df[predict_hpa], dataset_years_df, variables[i], path_prefix_eras)
@@ -106,9 +109,10 @@ def main():
     print()
     print("2. HPA VS. PERCENT CHANGE OF SINGLE VARIABLES")
     for i in range(1, len(variables), 2):
-        mse, coeff, intercept = linreg(dataset_df[variables[i]], dataset_df[predict_hpa])
+        r2, mse, coeff, intercept = linreg(dataset_df[variables[i]], dataset_df[predict_hpa])
         print("HPA vs.", variables[i], ": coeff =", coeff[0], "& intercept =", intercept)
         print("        MSE:", mse)
+        print("         R2:", r2)
 
         visualize_all(dataset_df[variables[i]], dataset_df[predict_hpa], coeff, intercept, variables[i], path_prefix_all)
         visualize_eras(dataset_df[variables[i]], dataset_df[predict_hpa], dataset_years_df, variables[i], path_prefix_eras)
@@ -118,9 +122,10 @@ def main():
     print("3. HPA VS. SINGLE VARIABLES + PERCENT CHANGE OF SINGLE VARIABLES")
     for i in range(0, len(variables), 2):
         linreg(dataset_df[variables[i]], dataset_df[predict_hpa])
-        mse, coeff, intercept = linreg(dataset_df[[variables[i], variables[i + 1]]], dataset_df[predict_hpa])
+        r2, mse, coeff, intercept = linreg(dataset_df[[variables[i], variables[i + 1]]], dataset_df[predict_hpa])
         print("HPA vs.", variables[i], ": coeff =", coeff, "& intercept =", intercept)
         print("        MSE:", mse)
+        print("         R2:", r2)
 
 if __name__ == '__main__': 
     main()
